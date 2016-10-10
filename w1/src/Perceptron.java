@@ -23,7 +23,7 @@ public class Perceptron {
     }*/
 
     public void readData(String name) throws FileNotFoundException {
-        name = "C:\\Users\\PC\\Desktop\\Nowy folder\\src\\"+name+".txt";
+        name = "C:\\Users\\PC\\Desktop\\psi\\Podstawy-sztucznej-inteligencji\\w1\\src\\"+name+".txt";
         File file = new File(name);
         //System.out.println(name);
         Scanner scanner = new Scanner(file);

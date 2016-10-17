@@ -1,0 +1,26 @@
+Przegl¹d literatury:
+1. http://osilek.mimuw.edu.pl/index.php?title=Sztuczna_inteligencja/SI_Modu%C5%82_8_-_Gry_dwuosobowe#Pe.C5.82ny_mini-maks
+Opisany zosta³ tutaj model gry dwuosobowej. Podsatwowe zasady tego modelu to:
+     W grze uczestniczy dwóch graczy.
+    Gracze wykonuj¹ ruchy naprzemiennie.
+    W ka¿dej sytuacji na planszy jest skoñczona liczba mo¿liwych do wykonania ruchów.
+    Sytuacja na planszy i wykonany ruch jednoznacznie wyznaczaj¹ nastêpn¹ sytuacjê na planszy.
+    Ka¿da mo¿liwa sytuacja na planszy mo¿e byæ jednoznacznie zaklasyfikowana do jednej z nastêpuj¹cych kategorii:
+        wygrana pierwszego gracza,
+        wygrana drugiego gracza,
+        remis,
+        sytuacja nierozstrzygniêta. 
+Ka¿da gra w powy¿szym modelu moze zostaæ opisana poprzez drzewo gry. Wêz³y drzewa gry odpowiadaj¹ sytuacjom na planszy. Ga³êzie wychodz¹ce z ka¿dego wêz³a reprezentuj¹ wszystkie mo¿liwe (ze wzglêdu na regu³y gry i aktualn¹ sytuacjê na plaszy) ruchy odpowiedniego gracza. Ka¿da z tych ga³êzi prowadzi do wêz³a potomnego zwi¹zanego z kolejn¹ sytuacj¹ na planszy, osi¹gan¹ po wykonaniu odpowiedniego ruchu, w której ruch bêdzie wykonywaæ drugi z graczy.
+Strategie minmaksowe opieraja siê na za³o¿eniu, ¿e przeciwnik wybiera zawsze najkorystniejszy dla siebie ruch. Ka¿demu wez³owi drzewa przypisywane s¹ liczbowe oceny. Gracz uczestnicz¹cy w rze bêdzie d¹¿y³ do wyboru maksymalizujacego ocenê wêz³a, zas przeciwnik do wyboru minimalizujacy tak¹ ocene. 
+
+2. http://www.mimuw.edu.pl/~awojna/SID/wyklady/gry.pdf
+Podobnie jak w pierwszej pozycji opisany jest model gry dwuosobowej. Pedrzstawiona zosta³a strategiagian Minmax. Przedstawiona zosta³a równiez przyk³adowa implementacja takiej strategii.
+
+3. http://4programmers.net/Delphi/Gotowce/K%C3%B3%C5%82ko_i_Krzy%C5%BCyk_na_5
+Przyk³adowa implementacja fry kó³ko krzyk. Przyk³adowa implementacja modu³u sztucznej inteligencjidla tej gry.
+
+4. http://neverstopbuilding.com/minimax
+Opis gry kó³ko krzy¿yk i przykladowa implementaja. Objasniony algorytm minmax i przyk³adowa jego implemntacja.
+
+5. https://www.ntu.edu.sg/home/ehchua/programming/java/JavaGame_TicTacToe_AI.html
+Implementacja algorytmu minmax i alfa-beta bed¹cy zmodyfikowan¹ wersj¹ minmax.

@@ -14,6 +14,7 @@ public class Perceptron {
     public void initiationImportance(){
         Random random=new Random();
         w1 = random.nextDouble();
+        random = new Random();
         w2 = random.nextDouble();
     }
 
@@ -37,9 +38,10 @@ public class Perceptron {
         scanner.close();
     }
 
-    public void learnPerceptron(String name) throws FileNotFoundException {
+    public void learnPerceptorn(String name) throws FileNotFoundException {
         readData(name);
         initiationImportance();
+        System.out.print(name+"\n");
         for(wektorUczacy w:data){
             double s=w.getA()*w1+w.getB()*w2-psi;
             if(s>0){
@@ -61,6 +63,12 @@ public class Perceptron {
 
     public void showImportance(){
         System.out.println("w1 = "+w1);
-        System.out.println("w2 = "+w1);
+        System.out.println("w2 = "+w2);
+    }
+
+    public boolean redOrBlue(){
+        Scanner scanner = new Scanner(System.in);
+        scanner.nextLine();
+        return true;
     }
 }

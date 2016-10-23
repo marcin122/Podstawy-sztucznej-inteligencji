@@ -24,3 +24,6 @@ Opis gry kó³ko krzy¿yk i przykladowa implementaja. Objasniony algorytm minmax i 
 
 5. https://www.ntu.edu.sg/home/ehchua/programming/java/JavaGame_TicTacToe_AI.html
 Implementacja algorytmu minmax i alfa-beta bed¹cy zmodyfikowan¹ wersj¹ minmax.
+
+6. http://www.codeproject.com/Articles/778260/AI-based-Tic-Tac-Toe
+Implementacja gry kó³ko i krzy¿yk z wykorzystaniem algorytmu minmax.

@@ -1,0 +1,1 @@
+W tym katalogu znajduje siê implementacja bramek logicznych AND, OR, NOT

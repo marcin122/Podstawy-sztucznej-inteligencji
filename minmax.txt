@@ -1,0 +1,168 @@
+ Podstawowy model gry
+
+Przed przyst¹pieniem do rozwa¿ania strategii wyboru ruchu musimy dok³adnie ustaliæ, jakiego rodzaju grami bêdziemy siê zajmowaæ, czyli okreœliæ przyjmowany dalej model gry. Na model ten sk³adaj¹ siê nastêpuj¹ce zasady:
+
+    W grze uczestniczy dwóch graczy.
+    Gracze wykonuj¹ ruchy naprzemiennie.
+    W ka¿dej sytuacji na planszy jest skoñczona liczba mo¿liwych do wykonania ruchów.
+    Sytuacja na planszy i wykonany ruch jednoznacznie wyznaczaj¹ nastêpn¹ sytuacjê na planszy.
+    Ka¿da mo¿liwa sytuacja na planszy mo¿e byæ jednoznacznie zaklasyfikowana do jednej z nastêpuj¹cych kategorii:
+        wygrana pierwszego gracza,
+        wygrana drugiego gracza,
+        remis,
+        sytuacja nierozstrzygniêta. 
+
+Czasem dopuszcza siê tak¿e mo¿liwoœæ liczbowej oceny skali wygranej (przewagi) w rozstrzygniêtej partii, lecz nie bêdziemy siê szerzej zajmowaæ takim rozszerzeniem.
+Inne rodzaje gier
+
+Przedstawiony powy¿ej model gry opisuje podstawowy rodzaj gier, które mo¿emy nazwaæ dwuosobowymi naprzemiennymi deterministycznymi grami planszowymi. W szczególnoœci obejmuje on takie klasyczne gry planszowe jak szachy i warcaby, ale nie jest jedynym, dla którego mo¿na rozwa¿aæ inteligentne techniki wyboru ruchu. Odrzucaj¹c lub modyfikuj¹c niektóre z podanych wy¿ej zasad mo¿emy otrzymywaæ inne rodzaje gier. Na szczególn¹ uwagê zas³uguj¹ gry niedeterministyczne, w których o zmianie sytuacji na planszy wspó³decyduje pewien czynnik losowy. Niedeterminizm mo¿e przyj¹æ dwie podstawowe formy:
+
+    wynik ruchu zale¿ny od czynnika losowego,
+    zestaw dostêpnych do wykonania ruchów zale¿y od czynnika losowego. 
+
+Drzewo gry
+
+Pojedyncza partia gry mo¿e byæ w pe³ni opisana przez ci¹g naprzemiennych ruchów obu graczy, od pocz¹tkowego ustawienia do rozstrzygniêcia. Aby w dowolnym momencie w trakcie trwania partii wybraæ najbardziej odpowiedni ruch dla jednego z graczy, mo¿na rozwa¿yæ wszystkie mo¿liwe scenariusze jej dalszego ci¹gu, rozpoczynaj¹ce siê ró¿nymi mo¿liwymi do wybrania ruchami tego gracza, po ka¿dym z których mo¿e nast¹piæ ka¿dy mo¿liwy ruch drugiego gracza, itp. Naturaln¹ reprezentacj¹ dla takiej przestrzeni sytuacji, mo¿liwych do osi¹gniêcia po kolejnych ruchach graczy, jest drzewo gry.
+Drzewiasta reprezentacja mo¿liwych scenariuszy
+
+Wêz³y drzewa gry odpowiadaj¹ sytuacjom na planszy. W korzeniu drzewa znajduje siê wêze³ odpowiadaj¹cy sytuacji, w której poszukujemy najlepszego ruchu dla jednego z graczy - bêdziemy go dalej nazywaæ krótko graczem, zaœ drugiego gracza - przeciwnikiem. Oprócz sytuacji na planszy z ka¿dym wêz³em - a œciœlej, z ka¿dym poziomem w drzewie - zwi¹zana jest informacja, który z graczy ma w niej wykonywaæ ruch. Poziom korzenia (nazwiemy go poziomem 0) jest poziomem gracza, kolejny - poziomem przeciwnika i dalej naprzemiennie.
+
+Ga³êzie wychodz¹ce z ka¿dego wêz³a reprezentuj¹ wszystkie mo¿liwe (ze wzglêdu na regu³y gry i aktualn¹ sytuacjê na plaszy) ruchy odpowiedniego gracza. Ka¿da z tych ga³êzi prowadzi do wêz³a potomnego zwi¹zanego z kolejn¹ sytuacj¹ na planszy, osi¹gan¹ po wykonaniu odpowiedniego ruchu, w której ruch bêdzie wykonywaæ drugi z graczy.
+
+Pe³ne drzewo gry dla danej sytuacji pocz¹tkowej to takie drzewo, w którym ka¿dy wêze³ odpowiadaj¹cy nierozstrzygniêtej sytuacji na planszy ma ga³êzie wychodz¹ce odpowiadaj¹ce wszystkim mo¿liwym ruchom oraz odpowiednie wêz³y potomne, reprezentuj¹ce sytuacje uzyskane po tych ruchach. W pe³nym drzewie wszystkie wêz³y terminalne (liœcie) reprezentuj¹ sytuacje, w których partia gry jest rozstrzygniêta. Ze wzglêdu na liczbê mo¿liwych sytuacji w nietrywialnych grach budowanie takiego pe³nego drzewa nie jest praktycznie mo¿liwe. Zachodzi w zwi¹zku z tym koniecznoœæ rozwa¿ania drzew gry, w których pozostaj¹ wêz³y terminalne odpowiadaj¹ce nie rozstrzygniêtym sytuacjom na planszy.
+
+Grafika:SI M8 drzewo gry.png
+
+Powy¿szy rysunek ilustruje drzewo gry, reprezentuj¹ce mo¿liwe scenariusze w dwóch kolejnych ruchach. Pokazano na nim trzy poziomy: poziom 0 \, (gracza), poziom 1 \, (przeciwnika) i poziom 2 \, (gracza), u¿ywaj¹c trójk¹tów o podstawie u do³u na oznaczenie wêz³ów gracza oraz trójk¹tów o podstawie u góry na oznaczenie wêz³ów przeciwnika. Z ka¿dego wêz³a poziomów 0 \, i 1 \, wychodz¹ trzy ga³êzie, reprezentuj¹ce trzy mo¿liwe do wykonania ruchu.
+Wybór ruchu jako przeszukiwanie
+
+Zadanie wyboru ruchu w grze mo¿emy traktowaæ jako zadanie przeszukiwania przestrzeni mo¿liwych przysz³ych scenariuszy partii, w celu znalezienia scenariusza najbardziej korzystneg dla gracza. Pierwszy ruch z takiego najkorzystniejszego scenariusza jest uznawany za poszukiwany najkorzystniejszy ruch. W tym przypadku wygodnie jest jednak zast¹piæ bezpoœrednie przeszukiwanie przestrzeni scenariuszy przeszukiwaniem przestrzeni sytuacji na planszy, z zachowaniem kolejnoœci przechodzenia miêdzy nimi. Ci¹g kolejnych sytuacji wyznacza wówczas scenariusz. Ten sposób postêpowania - zast¹pienie przeszukiwaniem przestrzeni sekwencji decyzji przeszukiwaniem przestrzeni wyników pojedynczych decyzji - jest nam ju¿ znany z ogólnej dyskusji metod przeszukiwania.
+
+Przyjmuj¹c takie podejœcie, zadanie wyboru ruchu odwzorowujemy na zadanie przeszukiwania w nastêpuj¹cy sposób:
+
+    stany: stanem jest sytuacja na planszy wraz ze wskazaniem aktualnego gracza (wykonuj¹cego nastêpny ruch), 
+    operatory: operatorem jest dowolny mo¿liwy ruch aktualnego gracza, 
+    stan pocz¹tkowy: stan odpowiadaj¹cy sytuacji na planszy, w której mamy wybraæ ruch dla gracza, 
+    stany koñcowe: stanem koñcowym jest dowolny stan, w którym partia jest rozstrzygniêta. 
+
+Zauwa¿my jednak, ¿e w zadaniu wyboru ruchu nie zadowala nas osi¹gniêcie jakiegokolwiek stanu koñcowego (dowolnego rozstrzygniêcia partii), ani nawet „najlepszego” stanu koñcowego (najbardziej korzystnego rozstrzygniêcia partii). Mo¿e nas interesowaæ tylko taki stan koñcowy, który jest zarazem „dobry” (jeœli chodzi o wynik partii) i który mo¿e byæ osi¹gniêty przy za³o¿eniu, ¿e przeciwnik d¹¿¹c do w³asnej wygranej wybiera wed³ug w³asnego uznania korzystnie dla siebie ruchy. To obecnoœæ przeciwnika, którego ruchy nie mog¹ byæ przewidziane i dok³adnie zaplanowane, decyduje o istotnej odmiennoœci zadania przeszukiwania w grach od innych rozwa¿anych przez nas zadañ przeszukiwania, i powoduje koniecznoœæ pos³ugiwania siê innymi, specyficznymi algorytmami.
+
+Drzewo gry reprezentuje przestrzeñ przeszukiwañ przy wyborze ruchu. Jego wêz³y odpowiadaj¹ stanom, a krawêdzie operatorom - tak samo jak w przypadku ogólnego drzewa przeszukiwania. Algorytmy przeszukiwania mog¹ tak¿e byæ przedstawione jako algorytmy przegl¹dania drzewa przeszukiwania, lecz w przeciwieñstwie do ogólnych algorytmów przeszukiwania, nie bêd¹ siê one ograniczaæ do przechodzenia pewnej œcie¿ki w drzewie (byæ mo¿e z nawrotami).
+Strategie minimaksowe
+
+Zauwa¿yliœmy ju¿, ¿e specyfika zadania wyboru ruchu w grze, wymuszaj¹ca zastosowanie specjalizowanych algorytmów przeszukiwania, polega na obecnoœci przeciwnika, który autonomicznie wybiera swoje ruchy. W ogólnym przypadku ruchów tych nie mo¿na w zwi¹zku z tym przewidzieæ (ani w sensie dok³adnym ani probabilistycznym). Najczêœciej stosowane podejœcie do ominiêcia tej trudnoœci polega na przyjêciu za³o¿enia, ¿e przeciwnik d¹¿¹c do wygrania partii zawsze wybiera najkorzystkiejszy dla siebie (a wiêc najmniej korzystny dla gracza) ruch. Gdybyœmy wiêc byli w stanie wêz³om drzewa gry przypisaæ liczbowe oceny odzwierciedlaj¹ce w pewien sposób szanse wygranej gracza, to na poziomie ruchu gracza nale¿y zak³adaæ wybór maksymalizuj¹cy tak¹ ocenê, zaœ na poziomie przeciwnika - wybór j¹ minimalizuj¹cy. Na takiej przes³ance opieraj¹ siê strategie minimaksowe.
+Zasada minimaksu
+
+Ignoruj¹c tymczasem praktyczne ograniczenia, weŸmy pod uwagê pe³ne drzewo gry dla pewnej sytuacji pocz¹tkowej, w której wybieramy ruch dla gracza. Wêz³y terminalne takiego drzewa odpowiadaj¹ sytuacjom, w których partia jest rozstrzygniêta. Wêz³om tym przypiszemy liczbow¹ ocenê ich u¿ytecznoœci z punktu widzenia gracza w nastêpuj¹cy sposób:
+
+    w przypadku wygranej gracza: ocena dodatnia M \,, 
+    w przypadku wygranej przeciwnika: ocena ujemna -M \,, 
+    w przypadku remisu: ocena 0 \,. 
+
+Przyjmiemy, ¿e ocena dokonywana jest z punktu widzenia gracza, niezale¿nie od tego, czy oceniany wêze³ terminalny drzewa gry znajduje siê na poziomie gracza, czy na poziomie przeciwnika. W ten sposób interpretacja liczbowej oceny ka¿dego wêz³a bêdzie jednolita: im wiêksza jej wartoœæ, tym wêze³ odpowiada korzystniejszej sytuacji z punktu widzenia gracza, dla którego ruch ma zostaæ wybrany.
+
+Dok³adne wartoœci liczbowe ocen wêz³ów mog¹ byæ ustalane ró¿nie i nie nie ma to na razie ¿adnego znaczenia, jeœli wyniki gry podlegaj¹ wy³¹cznie klasyfikacji na wygran¹ któregoœ z graczy albo remis (bez oceny skali wygranej). Gdyby skala (przewaga) wygranej mia³a byæ tak¿e brana pod uwagê, nale¿a³oby dodatkowo wymagaæ, aby sytuacje takiej samej wygranej gracza i przeciwnika oceniane by³y jednakowo co do wartoœci bezwzglêdnej.
+
+Po dokonaniu w opisany sposób oceny wszystkich wêz³ów terminalnych drzewa gry, oceny mo¿na propagowaæ do wêz³ów wewnêtrznych zgodnie z nastêpuj¹cymi zasadami:
+
+    na poziomie gracza: weze³ otrzymuje ocenê równ¹ maksimum ocen jego wêz³ów potomnych, 
+    na poziomie przeciwnika: wêze³ otrzymuje ocenê równ¹ minimum ocen jego wêz³ów potomnych. 
+
+Takie postêpowanie opiera siê na dwóch przes³ankach. Po pierwsze, wiemy, ¿e w kolejnych krokach gry gracz bêdzie w dalszym ci¹gu d¹¿y³ do wybrania jak najlepszego ruchu pos³uguj¹c siê wci¹¿ tym samym algorytmem. Po drugie, zak³adamy, ¿e tak samo bêdzie zachowywa³ siê przeciwnik. Poniewa¿ o przysz³ym zachowaniu przeciwnika nie mamy ¿adnej wiedzy, zak³adamy ostro¿nie najmniej korzystny dla gracza wariant, w którym przeciwnik wybierze ruch najlepszy dla siebie. Jest to tylko za³o¿enie, które dla praktycznych przeciwników, zw³aszcza niezalgorytmizowanych, nie musi byæ prawdziwe, lecz jest mo¿liwie bezpiecznym rozwi¹zaniem przy braku znajomoœci przeciwnika. Opisany sposób postêpowania jest zilustrowany na poni¿szym rysunku. Przy ka¿dym wêŸle zapisana zosta³a jego liczbowa ocena.
+
+Grafika:SI M8 minimax.png
+
+Efektem stosowania opisanej wy¿ej metody oceniania wêz³ów wewnêtrznych drzewa gry, nazywanej metod¹ minimaksow¹ albo zasad¹ minimaksu, jest przypisanie ka¿demu wêz³owi oceny odzwierciedlaj¹cej najlepszy mo¿liwy wynik partii dla gracza, przy za³o¿eniu najmniej dla niego korzystnych decyzji przeciwnika. Dla wêz³ów z poziomu gracza (w tym w szczególnoœci dla korzenia drzewa gry) ruch prowadz¹cy do wêz³a o maksymalnej ocenie bêdziemy nazywaæ ruchem optymalnym w sensie zasady mini-maks, albo krótko ruchem minimaks-optymalnym. W konkretnej partii gry z przeciwnikiem, który nie zawsze wybiera ruchy minimaks-optymalne dla siebie, mo¿e istnieæ ruch prowadz¹cy do lepszego wyniku partii ni¿ ruch minimaks-optymalny (np. ruch kiepski przy zachowuj¹cym siê optymalnie przeciwniku mo¿e okazaæ siê bardzo dobry jeœli przeciwnik pope³ni b³¹d), lecz w sytuacji, gdy strategia wyboru ruchu stosowana przez przeciwnika nie jest znana, nie mo¿na wykorzystaæ takich sytuacji. Jednoczeœnie mo¿na siê spodziewaæ, ¿e w wiêkszoœci sytuacji nieoptymalne zachowanie siê przeciwnika raczej u³atwi ni¿ utrudni sytuacjê gracza, a zatem stosowanie zasady mini-maks pozostaje uzasadnione tak¿e przy niskim poziomie kompetencji przeciwnika.
+Pe³ny mini-maks
+
+Zgodnie z okreœlon¹ wy¿ej zasad¹ minimaksu mo¿na przypisaæ liczbow¹ ocenê ka¿demu wêz³owi pe³nego drzewa gry, w którego korzeniu znajduje siê wêze³ odpowiadaj¹cy sytuacji, w której wybieramy ruch dla gracza. Nastêpnie nale¿y wybraæ ruch, który z korzenia prowadzi do wêz³a potomnego o najwy¿szej ocenie. Bêdzie to ruch minimaks-optymalny, zapewniaj¹cy najlepszy osi¹galny wynik partii dla gracza przy za³o¿eniu, ¿e przeciwnik wybiera zawsze ruchy najkorzystniejsze dla siebie. Oparty na zasadzie mini-maks algorytm wyboru ruchu w grze dwuosobowej mo¿na zapisaæ w poni¿szy sposób.
+
+    przypisz liœciom drzewa ocenê jako u¿ytecznoœæ z punktu widzenia aktualnego gracza;
+    dla ka¿dego poziomu k \, drzewa, zaczynaj¹c od poziomu przedostatniego i koñcz¹c na poziomie 0 \,
+        jeœli poziom k \, odpowiada akualnemu graczowi, przypisz ka¿demu wêz³owi tego poziomu ocenê wyznaczon¹ jako maksimum ocen jego wêz³ów potomnych z poziomu k+1 \,;
+        jeœli poziom k \, odpowiada przeciwnikowi akualnego gracza, przypisz ka¿demu wêz³owi tego poziomu ocenê wyznaczon¹ jako minimum ocen jego wêz³ów potomnych z poziomu k+1 \,; 
+    wybierz ruch prowadz¹cy do wêz³a poziomu 1 \, o maksymalnej ocenie. 
+
+Tak sformu³owany algorytm zak³ada, ¿e dysponujemy zbudowanym pe³nym drzewem gry, które nastêpnie przegl¹damy w kierunku od liœci do korzenia, odpowiednio propaguj¹c oceny. Wymaga to jawnej reprezentacji drzewa gry. Jest jednak mo¿liwa prostsza i bardziej elegancka implementacja tego algorytmu, która nie buduje w jawny sposób drzewa gry, lecz poœrednio reprezentuje je za pomoc¹ odpowiednio zorganizowanej rekurencji. Jak ³atwo siê przekonaæ, algorytm równowazny podanemu wy¿ej mo¿na zapisaæ w postaci nastêpuj¹cej funkcji rekurencyjnej, która zwraca liczbow¹ ocenê wêz³a. Dla przejrzystoœci pomijamy w jej zapisie przekazywanie informacji o tym, który faktycznie ruch maksymalizuje ocenê wêz³a potomnego i powinien byæ wybrany w korzeniu drzewa.
+
+minimax(stan s, gracz g): ocena stanu s z punktu widzenia gracza g
+
+    jeœli s jest stanem koñcowym, zwróæ u¿ytecznoœæ stanu s;
+    oblicz minimax(s', g) dla wszystkich mo¿liwych stanów nastêpnych s';
+    jeœli w stanie s ruch wykonuje gracz g, zwróæ maksimum uzyskanych wartoœci;
+    jeœli w stanie s ruch wykonuje przeciwnik gracza g, zwróæ minimum uzyskanych wartoœci. 
+
+Niezale¿nie od sformu³owania algorytmu, mo¿e wydaæ siê oczywistym „marnotrastwem” budowanie i analiza pe³nego drzewa gry (zak³adaj¹c, ¿e jest to wykonalne) tylko po to, aby wybraæ jeden ruch. Rzecz jasna pe³ne drzewo gry, gdyby zosta³o raz zbudowane, umo¿liwia przeprowadzenie partii do koñca, gdy¿ po ka¿dym wykonanym ruchu gracza i nastêpuj¹cym po nim ruchu przeciwnika wystarczy przenieœæ siê do odpowiedniego wêz³a, aby wybieraæ nastêpny ruch na podstawie wczeœniej wyznaczonych ocen. Co wiêcej, maj¹c pe³ne drzewo zbudowane od pocz¹tkowej sytuacji na planszy i ocenione wszystkie wêz³y, moglibyœmy przeprowadziæ dowoln¹ liczbê partii, wybieraj¹c ruchy na jego podstawie.
+Obciêty mini-maks
+
+Ze wzglêdu na ogromn¹ liczbê mo¿liwych sytuacji i scenariuszy w jakichkolwiek nietrywialnych grach stosowanie pe³nego algorytmu mini-maks nie jest w nich mo¿liwe. Nie jest dla nich wykonalne w ¿adnym rozs¹dnym czasie (i z wykorzystaniem pamiêci o jakichkolwiek praktycznie dostêpnych pojemnoœciach) przejrzenie pe³nego drzewa gry. Naturalnym pomys³em na dostosowanie algorytmu mini-maks do wymogów praktycznych jest ograniczenie g³êbokoœci analizowania drzewa gry do pewnej liczby poziomów (zale¿nej od z³o¿onoœci gry i dostêpnej mocy obliczeniowej). Oznacza to, ¿e w analizowanym drzewie gry bêd¹ wêz³y odpowiadaj¹ce nierozstrzygniêtej partii nie posiadaj¹ce wêz³ów potomnych. Aby by³o wówczas mo¿liwe zastosowanie algorytmu mini-maks, ka¿dy z takich wêz³ów musi otrzymaæ ocenê opart¹ nie na wyniku partii (brak rozstrzygniêcia) ani na ocenach wêz³ów potomnych (brak wêz³ów potomnych), lecz wy³¹cznie na analizie zwi¹zanego z nim stanu gry.
+
+Jak widaæ, potrzebujemy do oceny wêz³ów terminalnych ograniczonego drzewa gry funkcji heurystycznej. Tak jak w ogólnym zadaniu przeszukiwania funkcja taka ocenia „jakoœæ” stanu (tam rozumian¹ jako odleg³oœæ od stanu docelowego) bez faktycznego generowania jakichkolwiek stanów nastêpnych, lecz wy³¹cznie na podstawie jego analizy, tak tutaj funkcja heurystyczna oceniaæ bêdzie u¿ytecznoœæ stanu z punktu widzenia gracza bez rozwa¿ania dalszych mo¿liwych ruchów, wy³¹cznie rozwa¿aj¹c sytuacjê na planszy. Zak³adaj¹c dostêpnoœæ takiej heurystycznej funkcji oceny, obciêty algorytm mini-maks mo¿emy sformu³owaæ jako prost¹ modyfikacjê rekurencyjnej wersji pe³nego algorytmu.
+
+minimax(stan s, gracz g, poziom k): ocena stanu s z punktu widzenia gracza g
+
+    jeœli s jest stanem koñcowym, zwróæ u¿ytecznoœæ stanu s;
+    jeœli k przekracza maksymaln¹ g³êbokoœæ przeszukiwania, zwróæ heurystyczn¹ ocenê stanu s;
+    oblicz minimax(s', g, k+1) dla wszystkich mo¿liwych stanów nastêpnych s';
+    jeœli w stanie s ruch wykonuje gracz g, zwróæ maksimum uzyskanych wartoœci;
+    jeœli w stanie s ruch wykonuje przeciwnik gracza g, zwróæ minimum uzyskanych wartoœci. 
+
+Mo¿liwe usprawnienia
+
+Przedstawiony obciêty algorytm mini-maks jest algorytmem, który mo¿e byæ z dobrym skutkiem zastosowany w praktyce. Z odpowiednio starannie zaprojektowan¹ funkcj¹ herystyczn¹ mo¿e w wielu grach skutecznie konkurowaæ przynajmniej z œredniej klasy graczami-ludŸmi. Rozwa¿aj¹c praktyczne stosowanie tego algorytmu warto jednak zwróciæ na pewne mo¿liwe usprawnienia.
+
+Pierwsza mo¿liwa zmiana to zast¹pienie sta³ej g³êbokoœci rozwa¿anego drzewa gry zmienn¹ g³êbokoœci¹ - poszczególne ga³êzie drzewa mog³yby siê ró¿niæ poziomem, na którym wystêpuj¹ wêz³y terminalne. Do realizacji tej koncepcji nale¿a³oby wzbogaciæ funkcjê heurystyczn¹ o mo¿liwoœæ dostarczania poziomu ufnoœci dokonywanej oceny - spodziewaj¹c siê, ¿e ró¿ne sytuacje na planszy mo¿na oceniæ z niejednakow¹ ufnoœci¹. W trakcie rozwa¿ania kolejnych wêz³ów zawsze najpierw stosowana by³aby funkcja heurystyczna, a dalsza rozbudowa drzewa w g³¹b - tylko wówczas, gdy poziom ufnoœci oceny heurystycznej nie bêdzie wystarczaj¹co wysoki. Oszczêdzaj¹c w ten sposób na obliczeniach w oczywistych sytuacjach mo¿emy staranniej (g³êbiej rozbudowuj¹c drzewo) przeanalizowaæ sytuacje mniej oczywiste.
+
+Drugi pomys³ opiera siê na spostrze¿eniu, ¿e w trakcie partii stosuj¹c konsenwentnie algorytm mini-maks do wybierania kolejnych ruchów gracza i rozwa¿aj¹c w nim drzewo gry o pewnej g³êbokoœci k>2 \, mo¿emy przy wyborze kolejnego ruchu wykorzystaæ fragment drzewa zbudowanego przy rozwa¿aniu poprzedniego ruchu. Jeœli wybieraliœmy ruch dla gracza na poziomie 0 \, drzewa, to rozwa¿yliœmy tak¿e wszystkie mo¿liwe ruchy przeciwnika na poziomie 1 \,, nastêpnie dla ka¿dego z nich wszystkie mo¿liwe kolejne ruchy gracza na poziomie 2 \, itd. Jeœli teraz gracz faktycznie wykona³ wybrany ruch, w odpowiedzi na co przeciwnik wybra³ i wykona³ w³asny ruch, w w poprzednio zbudowanym drzewie mo¿emy znaleŸæ na poziomie 2 \, wêze³ odpowiadaj¹cy aktualnej sytuacji i wykorzystaæ go ponownie (wraz z ca³ym poddrzewem poni¿ej niego) jako korzeñ aktualnego drzewa gry, pog³êbiaj¹c je odpowiednio zamiast budowaæ je ca³kowicie od nowa. Technika ta nie mo¿e niestety byæ wprost po³¹czona z eleganckim rekurencyjnym sformu³owaniem algorytmu mini-maks gdy¿ wymaga pewnej jawnej reprezentacji drzewa, w celu póŸniejszego powtórnego u¿ycia jego fragmentu.
+Ciêcia alfa-beta
+
+Algorytm mini-maks jest zadowalaj¹cym rozwi¹zaniem, jeœli ograniczymy jego stosowanie do umiarkowanie z³o¿onych gier albo wymagamy tylko umiarkowanego poziomu gry (porównywalnego ze œrednim ludzkim graczem, lecz ustêpuj¹cego bardziej doœwiadczonym i b³yskotliwym graczom). Aby jednak wykazaæ dobry poziom w naprawdê z³o¿onych grach, potrzebny jest algorytm w bardziej racjonalny sposób wykorzystuj¹cy dostêpn¹ moc obliczeniow¹ w celu mo¿liwie g³êbokiego zbadania drzewa gry tam gdzie mo¿e to wp³yn¹æ na zmianê wybieranego ruchu, kosztem rezygnacji z rozbudowy i analizy drzewa gry tam, gdzie jej wynik i tak nie wp³ynie na wybierany ruch. Tak¹ zracjonalizowan¹ alokacjê mocy obliczeniowej realizuje algorytm ciêæ alfa-beta (albo przycinania alfa-beta), oparty na obciêtym algorytmie mini-maks, lecz wzbogacaj¹cy go o kryteria umo¿liwiaj¹ce bezpieczne pominiêcie w analizie (wyciêcie) fragmentów drzewa gry.
+Kryteria ciêæ
+
+Rozwa¿my sytuacjê, w której oceniamy pewien wêze³ w \, na poziomie k \, drzewa gry i za³ó¿my, ¿e jest to poziom gracza. W zwi¹zku z tym powinniœmy zgodnie z zasad¹ minimaksu wyznaczyæ oceny wszystkich wêz³ów potomnych na poziomie k+1 \,, a nastêpnie przyj¹æ ich maksimum jako ocenê wêz³a w \,.
+
+Niech w_1 \, bêdzie pierwszym ocenionym wêz³em potomnym wêz³a w \, i niech \alpha \, oznacza jego ocenê. Natychmiast po wyznaczeniu tej liczby wiemy ju¿, ¿e ostateczna ocena wêz³a w \, bêdzie wiêksza lub równa \alpha \, (tymczasowe maksimum). Niech teraz w_2 \, oznacza kolejny brany pod uwagê wêze³ potomny wêz³a w \,. Ocena tego wêz³a jest dla nas przydatna tylko pod warunkiem, ¿e wp³ywa na ocenê wêz³a w \,. Taki wp³yw mia³by miejsce tylko wtedy, gdyby ocena wêz³a w_2 \, mia³a przewy¿szaæ \alpha \, (dotychczasowe maksimim). Poniewa¿ wêze³ w_2 \, jest wêz³em na poziomie przeciwnika. jego ocena bêdzie wyznaczana przez minimalizacjê ocen jego wêz³ów potomnych z poziomu k+2 \,. Przyjmijmy, ¿e wêz³y te bêd¹ oceniane kolejno, i po ocenieniu ka¿dego z nich aktualizowane bêdzie dotychczasowe minimum. Teraz zauwa¿my, ¿e jeœli w którymkolwiek momencie oka¿e siê, ¿e to tymczasowe minimum jest mniejsze lub równe \alpha \,, to od razu wiadomo, ¿e koñcowa ocena wêz³a w_2 \, nie bêdzie przekraczaæ \alpha \,, w tym samym jej dalsze wyznaczanie nie ma uzasadnienia, gdy¿ nie mo¿e ona wp³yn¹æ na ocenê wêz³a w \,. W tym momencie mo¿emy porzuciæ dalsze rozwa¿anie wêz³ów potomnych wêz³a w_2 \, i zaj¹æ siê kolejnym wêz³em potomnym wêz³a w \,.
+
+Przedstawione rozumowanie jest podstaw¹ eliminacji z rozwa¿ania fragmentu drzewa, nazywanej ciêciem alfa. Mo¿na je przeprowadziæ tak¿e dla przypadku, gdy oceniany jest wêze³ na poziomie przeciwnika przez minimalizacjê ocen wêz³ów potomnych. Wówczas mo¿emy pomin¹æ dok³adne ocenianie tych wêz³ów, dla których stwierdzimy, ¿e ocena musia³aby byæ tak czy inaczej wiêksza lub równa dotyczasowemu minimum \beta \,. Mamy wtedy do czynienia z ciêciem beta. Zasada obu ciêæ mo¿e byæ zwiêŸle podsumowana nastêpuj¹co.
+
+    Ciêcie alfa: oceniaj¹c wêze³ przez maksymalizacjê ocen wêz³ów potomnych mo¿emy zakoñczyæ wyznaczanie oceny wêz³a potomnego natychmiast po stwierdzeniu, ¿e musi byæ ona ni¿sza ni¿ dotychczasowe maksimum \alpha \,. 
+    Ciêcie beta: oceniaj¹c wêze³ przez minimalizacjê ocen wêz³ów potomnych mo¿emy zakoñczyæ wyznaczanie oceny wêz³a potomnego natychmiast po stwierdzeniu, ¿e musi byæ ona wy¿sza ni¿ dotychczasowe minimum \beta \,. 
+
+Ilustracjê koncepcji ciêæ alfa-beta przedstawia poni¿szy rysunek. Pokazano na nim, jak w trakcie wyznaczania wêz³a na poziomie gracza w korzeniu drzewa mo¿na by³o pomin¹æ wêz³y na poziomie 2 \,, stosuj¹c ciêcie alfa. Wyciête poddrzewa zaznaczono za pomoc¹ „wisz¹cych” ga³êzi.
+
+Grafika:SI M8 alfa-beta.png
+Algorytm alfa-beta
+
+Przez algorytm alfa-beta rozumie siê to w istocie algorytm mini-maks wzbogacony o operacje ciêæ alfa i beta. Najbardziej naturalne i przejrzyste jest jego sformu³owanie rekurencyjne. W takim sformu³owaniu ciêcie odzwierciedlone jest przez rezygnacjê z niektórych wywo³añ rekurencyjncych, które nie s¹ konieczne do wyznaczenia oceny wêz³a.
+
+Ze wzglêdu na wyró¿nienie dwóch rodzajów ciêæ, odpowiadaj¹cych poziomom gracza i przeciwnika w drzewie gry, algorytm sformu³ujemy za pomoc¹ dwóch procedur z poœredni¹ rekurencj¹. Procedura minimax-alfa stosowana jest dla wêz³ów poziomu gracza (w tym dla wêz³a pocz¹tkowego, w którym poszukujemy ruchu do wykonania), zaœ procedura minimax-beta - dla poziomu przeciwnika.
+
+minimax-alfa(stan s, gracz g, poziom k, \alpha \,, \beta \,): ocena stanu s z punktu widzenia gracza g, jeœli w stanie s ruch wykonuje gracz g
+
+    jeœli s jest stanem koñcowym, zwróæ u¿ytecznoœæ stanu s;
+    jeœli k przekracza maksymaln¹ g³êbokoœæ przeszukiwania, zwróæ heurystyczn¹ ocenê stanu s;
+    dla ka¿dego mo¿liwego stanu nastêpnego s' wykonaj
+        \alpha \leftarrow \max\{\alpha,\textit{alfa-beta-min(s', g, k+1, }\alpha, \beta\textit{)}\} \,;
+        jeœli \alpha\geq\beta \,, zwróæ \beta \,; 
+    zwróæ \alpha \,. 
+
+minimax-beta(stan s, gracz g, poziom k, \alpha \,, \beta \,): ocena stanu s z punktu widzenia gracza g, jeœli w stanie s ruch wykonuje przeciwnik gracza g
+
+    jeœli s jest stanem koñcowym, zwróæ u¿ytecznoœæ stanu s;
+    jeœli k przekracza maksymaln¹ g³êbokoœæ przeszukiwania, zwróæ heurystyczn¹ ocenê stanu s;
+    dla ka¿dego mo¿liwego stanu nastêpnego s' wykonaj
+        \beta \leftarrow \min\{\alpha,\textit{alfa-beta-max(s', g, k+1, }\alpha, \beta\textit{)}\} \,;
+        jeœli \beta\leq\alpha \,, zwróæ \alpha \,; 
+    zwróæ \beta \,. 
+
+Heurystyczna ocena wêz³ów
+
+Nie ulega w¹tpliwoœci, ¿e skutecznoœæ algorytmów opartych na zasadzie minimaksu w przypadku, gdy przegl¹dany mo¿e byæ tylko minimalny fragment pe³nego drzewa gry (kilka pierwszych ruchów spoœród kilkudziesiêciu czy nawet kilkuset posuniêæ), w znacznej mierze zale¿y od jakoœci u¿ywanej funkcji heurystycznej. Odpowiednie okreœlenie takiej funkcji jest w przypadku nietrywialnych gier z³o¿onym zadaniem, w którym czêsto niezbêdny jest udzia³ doœwiadczonych ekspertów. W grach planszowych takich jak szachy funkcja taka jest obliczana z uwzglêdnieniem liczby poszczególnych figur w posiadaniu gracza i przeciwnika, ich bezwzglêdnego i wzglêdnego po³o¿enia, wystêpowania specyficznych uk³adów s¹siedztwa figur itd. Funkcja heurystyczna powinna spe³niaæ nastêpuj¹ce warunki:
+
+    przypisywaæ ocenê dodatni¹ stanowi, z którego wiêksze szanse wygranej ma gracz,
+    przypisywaæ ocenê ujemn¹ stanowi, z którego wiêksze szanse wygranej ma przeciwnik,
+    przypisywaæ ocenê tym wiêksz¹ co do wartoœci bezwzglêdnej, im przewaga szans wygranej odpowiednio gracza albo przeciwnika jest wiêksza. 
+
+Poniewa¿ istnieje mo¿liwoœæ, ¿e w ograniczonym drzewie gry niektóre wêz³y terminalne odpowiadaj¹ rostrzygniêtej partii (i s¹ oceniane bezpoœrednio na podstawie jej wyniku), a niektóre nie (i s¹ oceniane przez funkcjê heurystyczn¹), liczbowe wartoœci funkcji heurystycznej i bezpoœredniej oceny u¿ytecznoœci musz¹ byæ wyra¿one w ujednoliconej wspólnej skali. W sytuacji, gdy koñcowa ocena u¿ytecznoœci opiera siê wy³¹cznie na klasyfikacji wyniku (wygrana, przegrana, remis) bez uwzglêdniania skali wygranej/przegranej i przyjmuje wartoœci +M \, w przypadku wygranej oraz -M \, w przypadku przegranej, nale¿y zapewniæ, ¿e wartoœci funkcji heurystycznej znajduj¹ siê w przedziale (-M,M) \,.
+
+W najbardziej skutecznych programach graj¹cych w gry (dotyczy to zw³aszcza szachów) stosowane s¹ niezwykle wyrafinowane funkcje heurystyczne, oparte na najwy¿szej klasy wiedzy eksperckiej i szeroko zakrojonych eksperymentach. Szczególnie obiecuj¹cy jest tak¿e pomys³, aby (choæby bardzo skuteczna) funkcja heurystyczna mog³a podlegaæ modyfikacjom na podstawie rozgrywanych partii, w sposób poprawiaj¹cy dok³adnoœæ, z jak¹ pozwala ona przewidywaæ szanse wygranej w nierozstrzygniêtych sytuacjach. Jest to najbardziej naturalna technika wyposa¿enia programów graj¹cych w gry w zdolnoœæ do uczenia siê. 

@@ -1,3 +1,6 @@
+
+import com.sun.org.apache.xerces.internal.impl.xpath.regex.Match;
+
 import java.util.Random;
 import java.lang.Math;
 
@@ -37,6 +40,10 @@ public class Neuron {
         output=1/(1+Math.pow(Math.E,-beta*sum));
 
         return output;
+    }
+
+    public double pochodnaActivationFunction(double x){
+        return (beta*Math.pow(Math.E,-beta*x))/(Math.pow((1+Math.pow(Math.E,-beta*x)),2));
     }
 
     public int getNumInput() {

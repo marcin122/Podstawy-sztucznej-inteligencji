@@ -82,4 +82,8 @@ public class Neuron {
     public void setIn(double in) {
         this.in = in;
     }
+
+    public void setWages(double[] wages) {
+        this.wages = wages;
+    }
 }

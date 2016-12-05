@@ -6,29 +6,41 @@ public class Neuron {
     private double[] wages;
     private double output;
     private double[] input;
+    private double in;
     private double sum=0;
-    private double beta=0.2;
+    private double beta=0.6;
 
     public Neuron(int numInput) {
         this.numInput = numInput;
-        wages=new double[numInput];
-        input=new double[numInput];
-        initWages();
+        if(numInput==1){
+            wages=new double[numInput+1];
+            initWages();
+        }
+        else{
+            wages=new double[numInput+1];
+            input=new double[numInput];
+            initWages();
+        }
     }
 
     public void initWages(){
 
         Random random=new Random();
 
-        for(int i=0;i<numInput;i++){
+        for(int i=0;i<numInput+1;i++){
             wages[i]=random.nextDouble();
         }
     }
 
     public void sumWagesInput(){
-
-        for(int i=0;i<numInput;i++){
-            sum+=wages[i]*input[i];
+        if(numInput==1){
+            sum+=wages[0]*in+wages[1];
+        }
+        else{
+            for(int i=0;i<numInput;i++){
+                sum+=wages[i]*input[i];
+                if(i==numInput-1) sum+=wages[i+1];
+            }
         }
     }
 
@@ -61,5 +73,13 @@ public class Neuron {
 
     public void setInput(double[] input) {
         this.input = input;
+    }
+
+    public double getIn() {
+        return in;
+    }
+
+    public void setIn(double in) {
+        this.in = in;
     }
 }

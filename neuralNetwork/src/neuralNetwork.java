@@ -6,16 +6,12 @@ import java.util.Scanner;
 public class neuralNetwork {
     private Neuron[][] neurons;
     private double[][] delta;
-    private double eta=0.6;
-    private double del=0.4;
-    private boolean endBP=true;
-    private double[] wages;
-    double[] tabInput = {1,1,1,1,1,1,1,1,1,1};
-    double[] tabOutput = new double[9];
-    double[] tabInputHiddenSecondLayer = {1,1,1,1,1,1,1,1,1,1};
-    double[] tabInputHiddenThirdLayer = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
-    double[] tabOutputNetwrok = new double[9];
-    private Random random=new Random();
+    private double eta=0.3;
+    private double[] wages;private double[] tabInputHiddenSecondLayer = {1,1,1,1,1,1,1,1,1,1};
+    private double[] tabInputHiddenThirdLayer = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
+    private double[] tabOutputNetwrok = new double[9];
+    private double[][] dataLearningInput;
+    private double[][] dataLearningOutput;
 
     public neuralNetwork() {
 
@@ -54,17 +50,32 @@ public class neuralNetwork {
 
     }
 
-    public Scanner readData() throws FileNotFoundException {
+    public int readData() throws FileNotFoundException {
+
+        int n=0; //liczba rekordow
+
         String pathToFile = "C:\\Users\\PC\\Desktop\\psi\\Podstawy-sztucznej-inteligencji\\neuralNetwork\\src\\data.txt";
         File file = new File(pathToFile);
         Scanner scanner = new Scanner(file);
-        return scanner;
+
+        while(scanner.hasNext()){
+            n=scanner.nextInt();
+            dataLearningInput=new double[n][10];
+            dataLearningOutput=new double[n][9];
+
+            for(int i=0;i<n;i++){
+                for(int j=0;j<10;j++) dataLearningInput[i][j]=scanner.nextInt();
+                for(int j=0;j<9;j++) dataLearningOutput[i][j]=scanner.nextInt();
+            }
+
+        }
+        return n;
     }
 
-    public void networkCompute(){
+    public void networkCompute(int m){
         //obliczenia dla pierwszej powloki
         for (int i = 0; i < neurons[0].length; i++) {
-            neurons[0][i].setInput(tabInput);
+            neurons[0][i].setInput(dataLearningInput[m]);
             neurons[0][i].sumWagesInput();
             tabInputHiddenSecondLayer[i] = neurons[0][i].activationFunction();
         }
@@ -84,10 +95,10 @@ public class neuralNetwork {
         }
     }
 
-    public void deltaPropagation(){
+    public void deltaPropagation(int m){
         //blad na wyjsciu
-        for (int i = 0; i < tabOutput.length; i++) {
-            delta[2][i] = tabOutput[i] - tabOutputNetwrok[i];
+        for (int i = 0; i < tabOutputNetwrok.length; i++) {
+            delta[2][i] = dataLearningOutput[m][i] - tabOutputNetwrok[i];
         }
 
         //propagacja wsteczna na 2 powloke
@@ -106,40 +117,26 @@ public class neuralNetwork {
 
     public void backPropagation() throws FileNotFoundException {
 
-        Scanner scanner = readData();
-        double lastOutputs=10, presentOutputs;
-
-        //while (scanner.hasNext())
-        for(int n=0;n<30;n++){
-
-            //wczytanie danych do nauki
-            for (int i = 0; i < tabInput.length-1; i++) {
-                tabInput[i] = scanner.nextInt();//wejscie
-            }
-
-            for (int i = 0; i < tabOutput.length-1; i++) {
-                tabOutput[i] = scanner.nextInt(); //wyjscie
-            }
+        int recordNum=readData();
+        double lastDelta=0, presentDelta=0;
 
             //uczenie sieci
-            for(int m=0;m<random.nextInt(10);m++) {
+            for(int m=0;m<recordNum;m++) {
 
-                networkCompute();
-                deltaPropagation();
+                lastDelta=presentDelta;
+
+                networkCompute(m);
+
+                deltaPropagation(m);
 
                 //korekta wag 1 powloka
                 for(int i=0;i<neurons[0].length;i++){
                     wages=new double[neurons[0][i].getNumInput()+1];
                     for(int j=0;j<neurons[0][0].getNumInput()+1;j++) {
-                        wages[j]=neurons[0][i].getWages()[j] + eta * delta[0][i] * neurons[0][i].pochodnaActivationFunction() * tabInput[j];
+                        wages[j]=neurons[0][i].getWages()[j] + eta * delta[0][i] * neurons[0][i].pochodnaActivationFunction() * dataLearningInput[m][j];
                     }
                     neurons[0][i].setWages(wages);
                 }
-                //for (int i = 0; i < neurons[0].length; i++) {
-                //    neurons[0][i].setIn(tabInput[i]);
-                //    neurons[0][i].sumWagesInput();
-                //    tabInputHiddenSecondLayer[i] = neurons[0][i].activationFunction();
-                //}
 
                 //korekta wag 2 powloka
                 for(int i=0;i<neurons[1].length;i++){
@@ -149,11 +146,6 @@ public class neuralNetwork {
                     }
                     neurons[1][i].setWages(wages);
                 }
-                //for (int i = 0; i < neurons[0].length; i++) {
-                //    neurons[1][i].setInput(tabInputHiddenSecondLayer);
-                //    neurons[1][i].sumWagesInput();
-                //    tabInputHiddenThirdLayer[i] = neurons[1][i].activationFunction();
-                //}
 
                 //korekta wag 3 powloka
                 for(int i=0;i<neurons[2].length;i++){
@@ -163,19 +155,59 @@ public class neuralNetwork {
                     }
                     neurons[2][i].setWages(wages);
                 }
-                //for(int i=0;i<neurons[2].length;i++) {
-                //    neurons[2][i].setInput(tabInputHiddenThirdLayer);
-                //    neurons[2][i].sumWagesInput();
-                //    tabOutputNetwrok[i] = neurons[2][i].activationFunction();
-                //}
 
+                presentDelta=0;
+                for(int i=0;i<delta[2].length;i++){
+                    presentDelta+=delta[2][i];
+                }
 
                 for(int i=0;i<delta[0].length;i++) delta[0][i]=0;
                 for(int i=0;i<delta[1].length;i++) delta[1][i]=0;
                 for(int i=0;i<delta[2].length;i++) delta[2][i]=0;
-
             }
-        }
+
+            while(lastDelta>presentDelta){
+
+                Random random=new Random();
+                int n=random.nextInt(recordNum);
+                lastDelta=presentDelta;
+
+                networkCompute(n);
+
+                deltaPropagation(n);
+
+                //korekta wag 1 powloka
+                for(int i=0;i<neurons[0].length;i++){
+                    wages=new double[neurons[0][i].getNumInput()+1];
+                    for(int j=0;j<neurons[0][0].getNumInput()+1;j++) {
+                        wages[j]=neurons[0][i].getWages()[j] + eta * delta[0][i] * neurons[0][i].pochodnaActivationFunction() * dataLearningInput[n][j];
+                    }
+                    neurons[0][i].setWages(wages);
+                }
+
+                //korekta wag 2 powloka
+                for(int i=0;i<neurons[1].length;i++){
+                    wages=new double[neurons[1][i].getNumInput()+1];
+                    for(int j=0;j<neurons[1][0].getNumInput()+1;j++) {
+                        wages[j]=neurons[1][i].getWages()[j] + eta * delta[1][i] * neurons[1][i].pochodnaActivationFunction() * tabInputHiddenSecondLayer[j];
+                    }
+                    neurons[1][i].setWages(wages);
+                }
+
+                //korekta wag 3 powloka
+                for(int i=0;i<neurons[2].length;i++){
+                    wages=new double[neurons[2][i].getNumInput()+1];
+                    for(int j=0;j<neurons[2][0].getNumInput()+1;j++) {
+                        wages[j]=neurons[2][i].getWages()[j] + eta * delta[2][i] * neurons[2][i].pochodnaActivationFunction() * tabInputHiddenThirdLayer[j];
+                    }
+                    neurons[2][i].setWages(wages);
+                }
+
+                presentDelta=0;
+                for(int i=0;i<delta[2].length;i++){
+                    presentDelta+=delta[2][i];
+                }
+            }
     }
 
     public void doMove(double tabIn[]){
@@ -235,7 +267,6 @@ public class neuralNetwork {
 
 
     public static void main(String[] args){
-
         neuralNetwork network=new neuralNetwork();
         //network.showWages();
 
@@ -245,9 +276,7 @@ public class neuralNetwork {
             e.printStackTrace();
         }
         network.showWages();
-        double[] tab={1, -1,  1, -1,  1, -1,  0,  0,  0};
+        double[] tab={1, -1,  1, -1,  1, -1,  0,  0,  0,1};
         network.doMove(tab);
     }
-
-
 }

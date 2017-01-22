@@ -12,7 +12,7 @@ public class Neuron {
     public Neuron(int numInput) {
         this.numInput = numInput;
         wages=new double[numInput+1];
-        input=new double[numInput+10];
+        input=new double[numInput+1];
         initWages();
     }
 
